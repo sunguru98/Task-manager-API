@@ -36,7 +36,6 @@ router.post('/tasks', authenticate, async (req, res) => {
   const task = new Task({
     ...req.body, user: req.user._id
   }) // Passing request body to mongodb model
-  console.log(task)
   try {
     const result = await task.save()
     // Adding new task id to authenticated user's tasks array
@@ -103,12 +102,13 @@ router.delete('/tasks/:id', authenticate, async (req, res) => {
   if (taskId.length !== 24) return res.status(406).send({ message: 'Incorrect task id. Please try again' })
   try {
     const task = await Task.findOne({ _id: taskId, user: req.user._id })
-    if (!task) res.status(404).send({ message: 'Task not found' })
-    task.remove()
+    if (!task) return res.status(404).send({ message: 'Task not found' })
+    await task.remove()
+    // Removing task from users array
+    req.user.tasks = req.user.tasks.filter(sTask => sTask._id.toString() !== taskId)
+    await req.user.save()
     res.send(task)
-  } catch (err) {
-    err.name === 'CastError' ? res.status(406).send({ message: 'Incorrect task id. Please try again' }) : res.status(500).send({ message: err.message })
-  }
+  } catch (err) {res.status(500).send({ message: err })}
 })
 
 module.exports = router

@@ -10,7 +10,6 @@ const mongoose = require('mongoose')
 mongoose.connect(process.env.MONGODB_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
-  useFindAndModify: false,
-})
-  .then(() => console.log('Database connected'))
+  useFindAndModify: false
+}).then(() => console.log('Database connected'))
   .catch(err => console.log('There seems to be a error in connecting the database. Please try again', err))

@@ -11,7 +11,6 @@ const upload = multer({
     fileSize: 1000000 // 1 MB
   },
   fileFilter (req, file, callback) {
-    console.log(file.mimetype)
     // The regular expression is explained as follows
     // 1) Both forward slashes at front and back denote the start and end of that expression
     // 2) \ denotes to escape the '.' symbol as it is part of regex syntax
@@ -129,7 +128,7 @@ router.get('/users/:id', async (req, res) => {
   if (userId.length !== 24) return res.status(406).send({ message: 'Incorrect user id. Please try again' })
   try {
     const user = await User.findById(userId)
-    user ? res.send(user) : res.status(404).send({ message: 'User not found' })
+    user ? res.send({ user }) : res.status(404).send({ message: 'User not found' })
   } catch (err) {
     err.name === 'CastError' ? res.status(406).send({ message: 'Incorrect user id. Please try again' }) : res.status(500).send({ message: err.message })
   }
@@ -151,7 +150,7 @@ router.get('/user/profile', authenticate, async (req, res) => {
 router.delete('/user', authenticate, async (req, res) => {
   try {
     await req.user.remove()
-    res.send(req.user)
+    res.send({ user: req.user })
   } catch (err) {
     res.status(500).send({ message: err.message })
   }
